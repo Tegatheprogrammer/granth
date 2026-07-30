@@ -1,56 +1,63 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-const INK = "#0D0D0D";
-const PAPER = "#F7F4EF";
+const THEMES = {
+  light: { bg: "#FAFAF9", fg: "#1A1A1A", muted: "#737373", accent: "#2563EB", border: "#E5E5E5", cardBg: "#FFFFFF", sectionAlt: "#F5F5F4" },
+  dark: { bg: "#0C0C0C", fg: "#F5F5F5", muted: "#A3A3A3", accent: "#60A5FA", border: "#262626", cardBg: "#171717", sectionAlt: "#111111" },
+};
 
-const NAV_LINKS = ["Work", "About", "Services", "Contact"];
+const NAV_LINKS = ["Work", "About", "Skills", "Services", "Contact"];
 
 const PROJECTS = [
   {
     num: "01",
     name: "Xlar AI",
-    type: "Typescript Application",
-    year: "2024",
-    stack: ["Typescript", "JavaScript", "REST API", "Node"],
-    desc: "This website offers a text summarization tool that supports a wide range of content types, including PDFs (both text and scanned), Word documents, plain text and Markdown files, images (with OCR), and web articles. It automatically processes scanned documents and images using OCR to extract text for summarization..",
+    type: "AI Web Application",
+    year: "2025",
+    stack: ["TypeScript", "Node.js", "REST API", "OCR"],
+    desc: "A powerful text summarization tool supporting PDFs, Word docs, plain text, Markdown, images with OCR, and web articles. Automatically processes scanned documents for intelligent content extraction.",
     link: "https://xlar.vercel.app",
+    color: "#6366F1",
+    gradient: "linear-gradient(135deg, #6366F1, #8B5CF6)",
   },
   {
     num: "02",
-    name: "Issygn Investment Platform",
-    type: "Web Application",
-    year: "2024",
-    stack: ["React", "Vite", "CSS"],
-    desc: "A conversion-focused investment platform built with clean architecture, intuitive user flows, and a fully responsive interface designed for real business impact.",
-    link: "https://issygn.vercel.app",
+    name: "Cinee",
+    type: "Entertainment Platform",
+    year: "2025",
+    stack: ["React", "Vite", "TMDB API", "CSS"],
+    desc: "A sleek movie discovery and streaming platform with real-time search, curated collections, detailed movie info, and a smooth cinematic browsing experience.",
+    link: "https://cinee-sand.vercel.app",
+    color: "#EF4444",
+    gradient: "linear-gradient(135deg, #EF4444, #F97316)",
   },
- 
   {
     num: "03",
-    name: "Futuristic Portfolio",
-    type: "Portfolio Website",
-    year: "2024",
-    stack: ["React", "Vite", "CSS Animations"],
-    desc: "A visually ambitious personal portfolio with custom animations and futuristic design language — pushing what a personal site can look and feel like.",
-    link: "https://anth-ten.vercel.app",
+    name: "KWASU Food",
+    type: "Food Delivery App",
+    year: "2025",
+    stack: ["React", "Node.js", "MongoDB", "Express"],
+    desc: "A full-stack campus food ordering platform connecting students with local vendors. Features real-time order tracking, vendor dashboards, and seamless payment integration.",
+    link: "https://kwasu-food.onrender.com",
+    color: "#22C55E",
+    gradient: "linear-gradient(135deg, #22C55E, #14B8A6)",
   },
 ];
 
 const SKILLS = [
-  "React",
-  "Next.js",
-  "TypeScript",
-  "Vite",
-  "JavaScript ES6+",
-  "HTML5 & CSS3",
-  "Tailwind CSS",
-  "Framer Motion",
-  "Supabase",
-  "Firebase",
-  "REST APIs",
-  "Git & GitHub",
-  "Figma",
-  "Node.js",
+  { name: "React", level: 95 },
+  { name: "Next.js", level: 88 },
+  { name: "TypeScript", level: 85 },
+  { name: "JavaScript ES6+", level: 95 },
+  { name: "Vite", level: 90 },
+  { name: "Tailwind CSS", level: 92 },
+  { name: "HTML5 & CSS3", level: 95 },
+  { name: "Framer Motion", level: 80 },
+  { name: "Node.js", level: 82 },
+  { name: "Supabase", level: 78 },
+  { name: "Firebase", level: 80 },
+  { name: "REST APIs", level: 90 },
+  { name: "Git & GitHub", level: 92 },
+  { name: "Figma", level: 75 },
 ];
 
 const SERVICES = [
@@ -58,28 +65,36 @@ const SERVICES = [
     num: "01",
     title: "Landing Pages",
     desc: "Fast, conversion-focused pages that make your product impossible to ignore. Pixel-perfect on every screen size.",
+    icon: "🚀",
   },
   {
     num: "02",
     title: "Web Applications",
     desc: "Full-featured React apps with auth, databases, and clean UX — built to ship and built to scale from day one.",
+    icon: "⚡",
   },
   {
     num: "03",
     title: "UI/UX Development",
     desc: "From Figma file to flawless implementation. Smooth animations, thoughtful interactions, interfaces people enjoy.",
+    icon: "🎨",
   },
   {
     num: "04",
     title: "AI Integration",
-    desc: "Modern products powered by OpenAI, Claude API, and more. Smart features built right, from the very first line.",
+    desc: "Modern products powered by AI APIs. Smart features, chatbots, recognition tools — built right from the first line.",
+    icon: "🤖",
   },
 ];
 
+const EXPERIENCE = [
+  { year: "2025", role: "Frontend Developer", company: "Pantheon Studio", desc: "Building products at a venture studio in Abuja" },
+  { year: "2024", role: "Freelance Developer", company: "Independent", desc: "Shipped projects for startups and small businesses" },
+  { year: "2023", role: "CS Student", company: "Veritas University", desc: "Studying Computer Science, building side projects" },
+];
+
 function useWidth() {
-  const [w, setW] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1024
-  );
+  const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
   useEffect(() => {
     const fn = () => setW(window.innerWidth);
     window.addEventListener("resize", fn);
@@ -88,1097 +103,927 @@ function useWidth() {
   return w;
 }
 
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+function Reveal({ children, delay = 0, direction = "up", style = {} }) {
+  const [ref, visible] = useReveal();
+  const transforms = { up: "translateY(30px)", down: "translateY(-30px)", left: "translateX(30px)", right: "translateX(-30px)" };
+  return (
+    <div ref={ref} style={{
+      ...style,
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translate(0)" : transforms[direction],
+      transition: `opacity 0.7s cubic-bezier(.16,1,.3,1) ${delay}s, transform 0.7s cubic-bezier(.16,1,.3,1) ${delay}s`,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function Typewriter({ words, t }) {
+  const [state, setState] = useState({ index: 0, text: "", deleting: false });
+
+  useEffect(() => {
+    const { index, text, deleting } = state;
+    const word = words[index];
+    const speed = deleting ? 40 : 80;
+
+    if (!deleting && text === word) {
+      const timeout = setTimeout(() => setState((s) => ({ ...s, deleting: true })), 2000);
+      return () => clearTimeout(timeout);
+    }
+    if (deleting && text === "") {
+      const timeout = setTimeout(() => setState({ index: (index + 1) % words.length, text: "", deleting: false }), 100);
+      return () => clearTimeout(timeout);
+    }
+
+    const timeout = setTimeout(() => {
+      setState((s) => ({
+        ...s,
+        text: deleting ? word.substring(0, text.length - 1) : word.substring(0, text.length + 1),
+      }));
+    }, speed);
+    return () => clearTimeout(timeout);
+  }, [state, words]);
+
+  return (
+    <span style={{ color: t.accent }}>
+      {state.text}
+      <span style={{ animation: "blink 1s step-end infinite", borderRight: `2px solid ${t.accent}`, marginLeft: 2 }}>&nbsp;</span>
+    </span>
+  );
+}
+
+function SkillBar({ name, level, t }) {
+  const [ref, visible] = useReveal();
+  return (
+    <div ref={ref} style={{ padding: "16px 0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 500, color: t.fg }}>
+          {name}
+        </span>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: t.muted }}>
+          {level}%
+        </span>
+      </div>
+      <div className="skill-bar-bg">
+        <div className="skill-bar-fill" style={{
+          width: visible ? `${level}%` : "0%",
+          background: `linear-gradient(90deg, ${t.accent}, ${t.accent}80)`,
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function AnimNum({ val, suffix = "+" }) {
+  const [display, setDisplay] = useState(0);
+  const [ref, visible] = useReveal();
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (visible && !started.current) {
+      started.current = true;
+      let start = 0;
+      const step = () => {
+        start += Math.ceil(val / 25);
+        if (start >= val) { setDisplay(val); return; }
+        setDisplay(start);
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+  }, [visible, val]);
+
+  return <span ref={ref}>{display}{suffix}</span>;
+}
+
 export default function Portfolio() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [theme, setTheme] = useState("dark");
+  const [showTop, setShowTop] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const w = useWidth();
   const sm = w < 640;
   const md = w >= 640 && w < 1024;
   const lg = w >= 1024;
-  const px = sm ? "20px" : md ? "40px" : "64px";
+  const px = sm ? "20px" : md ? "40px" : "72px";
+  const t = THEMES[theme];
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30);
+    const timer = setTimeout(() => setLoaded(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const fn = () => {
+      setScrolled(window.scrollY > 30);
+      setShowTop(window.scrollY > 600);
+    };
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  const scrollToTop = useCallback(() => window.scrollTo({ top: 0, behavior: "smooth" }), []);
+
+  if (!loaded) {
+    return (
+      <div style={{
+        position: "fixed", inset: 0, background: t.bg, display: "flex",
+        alignItems: "center", justifyContent: "center", zIndex: 9999,
+        transition: "opacity 0.4s",
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+            fontSize: sm ? 28 : 36, color: t.fg, marginBottom: 20, letterSpacing: "-1px",
+          }}>
+            GA<span style={{ color: t.accent }}>.</span>
+          </div>
+          <div style={{
+            width: 40, height: 3, background: t.border, borderRadius: 2, overflow: "hidden",
+          }}>
+            <div style={{
+              width: "60%", height: "100%", background: t.accent, borderRadius: 2,
+              animation: "loadBar 1.2s ease-in-out infinite",
+            }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        background: PAPER,
-        color: INK,
-        fontFamily: "'Libre Franklin', 'Helvetica Neue', sans-serif",
-        overflowX: "hidden",
-      }}
-    >
+    <div style={{ background: t.bg, color: t.fg, fontFamily: "'Inter', 'Helvetica Neue', sans-serif", overflowX: "hidden", transition: "background 0.4s, color 0.4s" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        ::selection { background: ${INK}; color: ${PAPER}; }
+        ::selection { background: ${t.accent}30; color: ${t.fg}; }
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: ${PAPER}; }
-        ::-webkit-scrollbar-thumb { background: ${INK}20; }
+        ::-webkit-scrollbar-track { background: ${t.bg}; }
+        ::-webkit-scrollbar-thumb { background: ${t.accent}40; border-radius: 4px; }
         a { color: inherit; text-decoration: none; }
- 
-        .nav-a { font-size: 15px; font-weight: 500; color: ${INK}55; transition: color .18s; }
-        .nav-a:hover { color: ${INK}; }
- 
-        .btn-dark {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: ${INK}; color: ${PAPER};
-          padding: 13px 26px; font-family: inherit;
-          font-size: 14px; font-weight: 500; border: none; cursor: pointer;
-          transition: opacity .18s; letter-spacing: .2px;
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes loadBar { 0%{transform:translateX(-100%)} 50%{transform:translateX(60%)} 100%{transform:translateX(200%)} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes mq { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+        .nav-link { font-size: 14px; font-weight: 500; color: ${t.muted}; transition: color .2s; position: relative; }
+        .nav-link:hover { color: ${t.fg}; }
+        .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: ${t.accent}; transition: width .2s; }
+        .nav-link:hover::after { width: 100%; }
+
+        .btn-primary {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: ${t.accent}; color: #fff;
+          padding: 14px 28px; font-family: inherit;
+          font-size: 14px; font-weight: 600; border: none; border-radius: 8px;
+          cursor: pointer; transition: all .2s; letter-spacing: .3px;
         }
-        .btn-dark:hover { opacity: .82; }
- 
-        .btn-outline {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: transparent; color: ${INK};
-          padding: 13px 26px; font-family: inherit;
-          font-size: 14px; font-weight: 500;
-          border: 1.5px solid ${INK}22; cursor: pointer;
-          transition: border-color .18s;
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px ${t.accent}35; }
+
+        .btn-secondary {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: transparent; color: ${t.fg};
+          padding: 14px 28px; font-family: inherit;
+          font-size: 14px; font-weight: 600;
+          border: 1.5px solid ${t.border}; border-radius: 8px;
+          cursor: pointer; transition: all .2s;
         }
-        .btn-outline:hover { border-color: ${INK}; }
- 
-        .btn-light {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: ${PAPER}; color: ${INK};
-          padding: 15px 28px; font-family: inherit;
-          font-size: 15px; font-weight: 600; border: none; cursor: pointer;
-          transition: opacity .18s;
-        }
-        .btn-light:hover { opacity: .85; }
- 
+        .btn-secondary:hover { border-color: ${t.accent}; color: ${t.accent}; transform: translateY(-2px); }
+
         .project-card {
-          border: 1.5px solid ${INK}12;
-          padding: 28px 24px;
-          background: ${PAPER};
-          transition: border-color .18s, box-shadow .18s;
-          display: block;
+          border: 1.5px solid ${t.border};
+          border-radius: 12px;
+          background: ${t.cardBg};
+          transition: all .3s cubic-bezier(.16,1,.3,1);
+          display: block; overflow: hidden;
         }
-        .project-card:hover { border-color: ${INK}55; box-shadow: 0 4px 24px ${INK}08; }
- 
-        .skill-tag {
-          display: inline-block; padding: 7px 15px;
-          border: 1.5px solid ${INK}14;
-          font-size: 13px; font-weight: 500; color: ${INK}65;
-          transition: all .15s; cursor: default;
-        }
-        .skill-tag:hover { border-color: ${INK}; color: ${INK}; background: ${INK}04; }
- 
+        .project-card:hover { border-color: ${t.accent}60; transform: translateY(-6px); box-shadow: 0 20px 40px ${t.fg}08; }
+
+        .skill-bar-bg { width: 100%; height: 4px; background: ${t.border}; border-radius: 4px; overflow: hidden; }
+        .skill-bar-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+
         .svc-card {
-          padding: 28px 24px;
-          border: 1.5px solid ${INK}12;
-          transition: all .18s;
+          padding: 32px 28px; border: 1.5px solid ${t.border}; border-radius: 12px;
+          background: ${t.cardBg}; transition: all .3s;
         }
-        .svc-card:hover { background: ${INK}; border-color: ${INK}; }
-        .svc-card:hover .sn { color: ${PAPER}22 !important; }
-        .svc-card:hover .st { color: ${PAPER} !important; }
-        .svc-card:hover .sd { color: ${PAPER}60 !important; }
- 
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        .au { animation: fadeUp .7s cubic-bezier(.16,1,.3,1) both; }
-        .d1 { animation-delay: .05s; } .d2 { animation-delay: .15s; }
-        .d3 { animation-delay: .27s; } .d4 { animation-delay: .38s; }
-        .d5 { animation-delay: .5s; }
- 
-        @keyframes mq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .mq { display: flex; width: max-content; animation: mq 28s linear infinite; }
- 
+        .svc-card:hover { border-color: ${t.accent}; transform: translateY(-4px); box-shadow: 0 12px 30px ${t.fg}06; }
+
         .mobile-menu {
-          position: fixed; inset: 0; background: ${INK};
+          position: fixed; inset: 0; background: ${t.bg};
           z-index: 300; display: flex; flex-direction: column;
           padding: 0 20px 32px;
           opacity: 0; pointer-events: none;
-          transition: opacity .22s ease;
+          transition: opacity .25s ease;
         }
         .mobile-menu.open { opacity: 1; pointer-events: all; }
+
+        .theme-btn {
+          width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid ${t.border};
+          background: ${t.cardBg}; cursor: pointer; display: flex; align-items: center;
+          justify-content: center; font-size: 18px; transition: all .2s;
+        }
+        .theme-btn:hover { border-color: ${t.accent}; transform: rotate(30deg); }
+
+        .back-to-top {
+          position: fixed; bottom: 28px; right: 28px; z-index: 200;
+          width: 44px; height: 44px; border-radius: 50%;
+          background: ${t.accent}; color: #fff; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 18px; transition: all .3s; box-shadow: 0 4px 15px ${t.accent}40;
+        }
+        .back-to-top:hover { transform: translateY(-3px); }
+
+        .mq-track { display: flex; width: max-content; animation: mq 30s linear infinite; }
+
+        .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: ${t.accent}; border: 3px solid ${t.bg}; box-shadow: 0 0 0 2px ${t.accent}40; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          background: scrolled ? PAPER + "F2" : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: `1px solid ${scrolled ? INK + "0A" : "transparent"}`,
-          transition: "all .3s",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            padding: `0 ${px}`,
-            height: 64,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <a
-            href="#"
-            style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 20,
-              letterSpacing: "-.3px",
-              color: INK,
-            }}
-          >
-            Great Anthony
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: scrolled ? t.bg + "F0" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        borderBottom: scrolled ? `1px solid ${t.border}` : "1px solid transparent",
+        transition: "all .3s",
+      }}>
+        <div style={{
+          maxWidth: 1200, margin: "0 auto", padding: `0 ${px}`, height: 70,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <a href="#" style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+            fontSize: 22, letterSpacing: "-0.5px", color: t.fg,
+          }}>
+            GA<span style={{ color: t.accent }}>.</span>
           </a>
+
           {!sm ? (
             <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
               {NAV_LINKS.map((l) => (
-                <a key={l} href={`#${l.toLowerCase()}`} className="nav-a">
-                  {l}
-                </a>
+                <a key={l} href={`#${l.toLowerCase()}`} className="nav-link">{l}</a>
               ))}
-              <a
-                href="#contact"
-                className="btn-dark"
-                style={{ padding: "10px 20px", fontSize: 13 }}
-              >
+              <button className="theme-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+                {theme === "dark" ? "☀️" : "🌙"}
+              </button>
+              <a href="#contact" className="btn-primary" style={{ padding: "10px 22px", fontSize: 13, borderRadius: 6 }}>
                 Hire Me
               </a>
             </div>
           ) : (
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 4,
-                display: "flex",
-                flexDirection: "column",
-                gap: 5,
-              }}
-            >
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: "block",
-                    width: 22,
-                    height: 1.5,
-                    background: menuOpen ? PAPER : INK,
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button className="theme-btn" style={{ width: 38, height: 38, fontSize: 16 }} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+                {theme === "dark" ? "☀️" : "🌙"}
+              </button>
+              <button onClick={() => setMenuOpen((v) => !v)} style={{
+                background: "none", border: "none", cursor: "pointer", padding: 4,
+                display: "flex", flexDirection: "column", gap: 5,
+              }}>
+                {[0, 1, 2].map((i) => (
+                  <span key={i} style={{
+                    display: "block", width: 22, height: 2, background: t.fg, borderRadius: 1,
                     transition: "all .2s",
-                    transform: menuOpen
-                      ? i === 0
-                        ? "rotate(45deg) translateY(5px)"
-                        : i === 2
-                        ? "rotate(-45deg) translateY(-5px)"
-                        : "none"
-                      : "none",
+                    transform: menuOpen ? (i === 0 ? "rotate(45deg) translateY(7px)" : i === 2 ? "rotate(-45deg) translateY(-7px)" : "none") : "none",
                     opacity: menuOpen && i === 1 ? 0 : 1,
-                  }}
-                />
-              ))}
-            </button>
+                  }} />
+                ))}
+              </button>
+            </div>
           )}
         </div>
       </nav>
 
       {/* Mobile menu */}
       <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
-        <div
-          style={{
-            height: 64,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 20,
-              color: PAPER,
-            }}
-          >
-            Great Anthony
+        <div style={{ height: 70, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 22, color: t.fg }}>
+            GA<span style={{ color: t.accent }}>.</span>
           </span>
-          <button
-            onClick={() => setMenuOpen(false)}
-            style={{
-              background: "none",
-              border: "none",
-              color: PAPER,
-              fontSize: 24,
-              cursor: "pointer",
-              lineHeight: 1,
-            }}
-          >
+          <button onClick={() => setMenuOpen(false)} style={{
+            background: "none", border: "none", color: t.fg, fontSize: 28, cursor: "pointer", lineHeight: 1,
+          }}>
             ✕
           </button>
         </div>
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: 4,
-          }}
-        >
-          {NAV_LINKS.map((l) => (
-            <a
-              key={l}
-              href={`#${l.toLowerCase()}`}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontSize: "clamp(34px, 9vw, 50px)",
-                color: PAPER,
-                padding: "8px 0",
-                borderBottom: `1px solid ${PAPER}10`,
-                lineHeight: 1.15,
-              }}
-            >
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 4 }}>
+          {NAV_LINKS.map((l, i) => (
+            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setMenuOpen(false)} style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: "clamp(32px, 9vw, 48px)",
+              fontWeight: 700, color: t.fg, padding: "10px 0", borderBottom: `1px solid ${t.border}`,
+              lineHeight: 1.2, animation: menuOpen ? `slideIn 0.3s ${i * 0.06}s both` : "none",
+            }}>
               {l}
             </a>
           ))}
         </div>
-        <a
-          href="#contact"
-          onClick={() => setMenuOpen(false)}
-          className="btn-light"
-          style={{ borderRadius: 0 }}
-        >
+        <a href="#contact" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ textAlign: "center", borderRadius: 8 }}>
           Hire Me →
         </a>
       </div>
 
       {/* ── HERO ── */}
-      <section
-        style={{
-          paddingTop: sm ? 104 : 120,
-          paddingBottom: sm ? 64 : 96,
-          paddingLeft: px,
-          paddingRight: px,
-          maxWidth: 1200,
-          margin: "0 auto",
-        }}
-      >
-        <div
-          className="au d1"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 14px",
-            border: `1.5px solid ${INK}14`,
-            marginBottom: 36,
-          }}
-        >
-          <span
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: "#16A34A",
-              display: "inline-block",
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 10,
-              letterSpacing: 2.5,
-              color: INK + "60",
-            }}
-          >
-            AVAILABLE FOR PROJECTS
-          </span>
-        </div>
+      <section style={{
+        paddingTop: sm ? 120 : 140, paddingBottom: sm ? 80 : 120,
+        paddingLeft: px, paddingRight: px, maxWidth: 1200, margin: "0 auto",
+        minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center",
+      }}>
+        <Reveal delay={0}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px",
+            border: `1.5px solid ${t.border}`, borderRadius: 50, marginBottom: 32,
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22C55E", animation: "pulse 2s infinite" }} />
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: 2, color: t.muted,
+            }}>
+              AVAILABLE FOR PROJECTS
+            </span>
+          </div>
+        </Reveal>
 
-        <h1
-          className="au d2"
-          style={{
-            fontFamily: "'Libre Baskerville', serif",
-            fontSize: sm
-              ? "clamp(38px, 11vw, 52px)"
-              : "clamp(56px, 7.5vw, 88px)",
-            lineHeight: 1.08,
-            letterSpacing: sm ? "-1px" : "-2px",
-            color: INK,
-            marginBottom: 24,
-            maxWidth: 820,
-          }}
-        >
-          I build web experiences
-          <br />
-          <em style={{ color: INK + "50" }}>that work beautifully.</em>
-        </h1>
+        <Reveal delay={0.1}>
+          <h1 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: sm ? "clamp(36px, 11vw, 52px)" : "clamp(56px, 7.5vw, 80px)",
+            lineHeight: 1.05, letterSpacing: sm ? "-1px" : "-2.5px", fontWeight: 700,
+            color: t.fg, marginBottom: 8, maxWidth: 800,
+          }}>
+            I build web experiences
+          </h1>
+        </Reveal>
 
-        <p
-          className="au d3"
-          style={{
-            fontSize: sm ? 15 : 17,
-            lineHeight: 1.8,
-            color: INK + "65",
-            maxWidth: 500,
-            marginBottom: 36,
-            fontWeight: 400,
-          }}
-        >
-          Frontend developer based in Abuja, Nigeria. Specialising in React and
-          Next.js — turning ideas into fast, polished, production-ready
-          products.
-        </p>
+        <Reveal delay={0.15}>
+          <h1 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: sm ? "clamp(36px, 11vw, 52px)" : "clamp(56px, 7.5vw, 80px)",
+            lineHeight: 1.05, letterSpacing: sm ? "-1px" : "-2.5px", fontWeight: 700,
+            marginBottom: 28, maxWidth: 800,
+          }}>
+            that <Typewriter words={["work beautifully", "ship fast", "users love", "scale well"]} t={t} />
+          </h1>
+        </Reveal>
 
-        <div
-          className="au d4"
-          style={{
-            display: "flex",
-            gap: 12,
-            flexWrap: "wrap",
-            marginBottom: 64,
-          }}
-        >
-          <a href="#work" className="btn-dark">
-            View My Work →
-          </a>
-          <a href="#contact" className="btn-outline">
-            Get in Touch
-          </a>
-        </div>
+        <Reveal delay={0.2}>
+          <p style={{
+            fontSize: sm ? 16 : 18, lineHeight: 1.7, color: t.muted,
+            maxWidth: 520, marginBottom: 40, fontWeight: 400,
+          }}>
+            Frontend developer based in Abuja, Nigeria. Specialising in React and
+            Next.js — turning ideas into fast, polished, production-ready products.
+          </p>
+        </Reveal>
 
-        <div
-          className="au d5"
-          style={{
-            display: "grid",
-            gridTemplateColumns: sm ? "repeat(2,1fr)" : "repeat(4,1fr)",
-            gap: 1,
-            background: INK + "10",
-            border: `1.5px solid ${INK}10`,
-          }}
-        >
-          {[
-            ["10+", "Projects Shipped"],
-            ["5+", "Years Building"],
-            ["React", "Primary Stack"],
-            ["Remote", "Work Ready"],
-          ].map(([v, l]) => (
-            <div
-              key={l}
-              style={{
-                background: PAPER,
-                padding: sm ? "18px 14px" : "22px 20px",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: sm ? 26 : 32,
-                  color: INK,
-                  marginBottom: 6,
-                  letterSpacing: "-1px",
-                }}
-              >
-                {v}
+        <Reveal delay={0.25}>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 72 }}>
+            <a href="#work" className="btn-primary">View My Work →</a>
+            <a href="#contact" className="btn-secondary">Get in Touch</a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.3}>
+          <div style={{
+            display: "grid", gridTemplateColumns: sm ? "repeat(2,1fr)" : "repeat(4,1fr)",
+            gap: 1, background: t.border, borderRadius: 12, overflow: "hidden",
+            border: `1px solid ${t.border}`,
+          }}>
+            {[
+              [10, "Projects Shipped", "+"],
+              [5, "Years Building", "+"],
+              [3, "Live Products", ""],
+              [100, "Client Satisfaction", "%"],
+            ].map(([n, l, suffix]) => (
+              <div key={l} style={{ background: t.cardBg, padding: sm ? "20px 16px" : "28px 24px" }}>
+                <div style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 28 : 36,
+                  fontWeight: 700, color: t.fg, marginBottom: 6, letterSpacing: "-1px",
+                }}>
+                  <AnimNum val={n} suffix={suffix} />
+                </div>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                  letterSpacing: 2, color: t.muted, textTransform: "uppercase",
+                }}>
+                  {l}
+                </div>
               </div>
-              <div
-                style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 9,
-                  letterSpacing: 2,
-                  color: INK + "40",
-                  textTransform: "uppercase",
-                }}
-              >
-                {l}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
-      {/* Marquee divider */}
-      <div
-        style={{
-          overflow: "hidden",
-          borderTop: `1px solid ${INK}08`,
-          borderBottom: `1px solid ${INK}08`,
-          padding: "13px 0",
-          background: INK,
-        }}
-      >
-        <div className="mq">
+      {/* ── MARQUEE ── */}
+      <div style={{
+        overflow: "hidden", borderTop: `1px solid ${t.border}`, borderBottom: `1px solid ${t.border}`,
+        padding: "16px 0", background: theme === "dark" ? "#111" : "#F0F0EE",
+      }}>
+        <div className="mq-track">
           {[...Array(8)].map((_, i) => (
-            <span
-              key={i}
-              style={{
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 9,
-                letterSpacing: 4,
-                color: PAPER + "22",
-                marginRight: 48,
-                whiteSpace: "nowrap",
-              }}
-            >
-              REACT — NEXT.JS — TYPESCRIPT — VITE — TAILWIND — SUPABASE — AI
-              INTEGRATION — FRAMER MOTION
+            <span key={i} style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: 3, color: t.muted + "60", marginRight: 48, whiteSpace: "nowrap",
+            }}>
+              REACT — NEXT.JS — TYPESCRIPT — VITE — TAILWIND — NODE.JS — SUPABASE — AI INTEGRATION — FRAMER MOTION
             </span>
           ))}
         </div>
       </div>
 
       {/* ── WORK ── */}
-      <section
-        id="work"
-        style={{ padding: `80px ${px}`, maxWidth: 1200, margin: "0 auto" }}
-      >
-        <div
-          style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: 10,
-            letterSpacing: 3.5,
-            color: INK + "35",
-            textTransform: "uppercase",
-            marginBottom: 18,
-          }}
-        >
-          Selected Work
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: 40,
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: sm ? 32 : 44,
-              letterSpacing: "-1.5px",
-              lineHeight: 1.1,
-              color: INK,
-            }}
-          >
-            Recent Projects
-          </h2>
-          <a
-            href="https://github.com/tegatheprogrammer"
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 10,
-              letterSpacing: 3,
-              color: INK + "45",
-              borderBottom: `1px solid ${INK}20`,
-              paddingBottom: 2,
-            }}
-          >
-            ALL ON GITHUB →
-          </a>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: lg
-              ? "repeat(3,1fr)"
-              : md
-              ? "repeat(2,1fr)"
-              : "1fr",
-            gap: 16,
-          }}
-        >
-          {PROJECTS.map((p) => (
-            <a
-              key={p.num}
-              href={p.link}
-              target="_blank"
-              rel="noreferrer"
-              className="project-card"
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: 20,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: 10,
-                    color: INK + "28",
-                    letterSpacing: 2,
-                  }}
-                >
-                  {p.num}
-                </span>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span
-                    style={{
-                      fontFamily: "'DM Mono', monospace",
-                      fontSize: 10,
-                      color: INK + "30",
-                      letterSpacing: 1,
-                    }}
-                  >
-                    {p.year}
-                  </span>
-                  <span style={{ fontSize: 15, color: INK + "35" }}>↗</span>
-                </div>
-              </div>
-              <h3
-                style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: 22,
-                  letterSpacing: "-.5px",
-                  color: INK,
-                  marginBottom: 8,
-                  lineHeight: 1.25,
-                }}
-              >
-                {p.name}
-              </h3>
-              <div
-                style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  color: INK + "40",
-                  marginBottom: 14,
-                }}
-              >
-                {p.type}
-              </div>
-              <p
-                style={{
-                  fontSize: 14,
-                  lineHeight: 1.78,
-                  color: INK + "62",
-                  marginBottom: 20,
-                }}
-              >
-                {p.desc}
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {p.stack.map((s) => (
-                  <span
-                    key={s}
-                    style={{
-                      fontFamily: "'DM Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: 1,
-                      padding: "4px 10px",
-                      border: `1px solid ${INK}12`,
-                      color: INK + "45",
-                    }}
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
+      <section id="work" style={{ padding: `100px ${px}`, maxWidth: 1200, margin: "0 auto" }}>
+        <Reveal>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+            letterSpacing: 3, color: t.accent, textTransform: "uppercase", marginBottom: 12,
+          }}>
+            Selected Work
+          </div>
+        </Reveal>
+        <Reveal delay={0.05}>
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "flex-end",
+            marginBottom: 48, flexWrap: "wrap", gap: 16,
+          }}>
+            <h2 style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 32 : 44,
+              letterSpacing: "-1.5px", lineHeight: 1.1, fontWeight: 700, color: t.fg,
+            }}>
+              Recent Projects
+            </h2>
+            <a href="https://github.com/tegatheprogrammer" target="_blank" rel="noreferrer" style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: 2,
+              color: t.accent, display: "flex", alignItems: "center", gap: 6,
+            }}>
+              ALL ON GITHUB <span style={{ fontSize: 16 }}>→</span>
             </a>
+          </div>
+        </Reveal>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: lg ? "repeat(3,1fr)" : md ? "repeat(2,1fr)" : "1fr",
+          gap: 20,
+        }}>
+          {PROJECTS.map((p, idx) => (
+            <Reveal key={p.num} delay={idx * 0.1}>
+              <a href={p.link} target="_blank" rel="noreferrer" className="project-card">
+                <div style={{
+                  height: sm ? 140 : 180, background: p.gradient,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  position: "relative", overflow: "hidden",
+                }}>
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `radial-gradient(circle at 30% 70%, ${p.color}40, transparent 70%)`,
+                  }} />
+                  <span style={{
+                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700,
+                    fontSize: sm ? 28 : 36, color: "#fff", letterSpacing: "-1px",
+                    position: "relative", zIndex: 1,
+                  }}>
+                    {p.name}
+                  </span>
+                  <div style={{
+                    position: "absolute", top: 12, right: 12,
+                    background: "rgba(255,255,255,0.2)", backdropFilter: "blur(8px)",
+                    padding: "4px 10px", borderRadius: 20, fontSize: 10,
+                    color: "#fff", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
+                  }}>
+                    LIVE ●
+                  </div>
+                </div>
+
+                <div style={{ padding: "24px 22px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <div>
+                      <h3 style={{
+                        fontFamily: "'Space Grotesk', sans-serif", fontSize: 20,
+                        letterSpacing: "-0.3px", fontWeight: 700, color: t.fg,
+                        marginBottom: 4, lineHeight: 1.2,
+                      }}>
+                        {p.name}
+                      </h3>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        letterSpacing: 2, color: t.muted,
+                      }}>
+                        {p.type}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        color: t.muted, letterSpacing: 1,
+                      }}>
+                        {p.year}
+                      </span>
+                      <span style={{ fontSize: 16, color: t.accent }}>↗</span>
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: 14, lineHeight: 1.7, color: t.muted, marginBottom: 18 }}>
+                    {p.desc}
+                  </p>
+
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {p.stack.map((s) => (
+                      <span key={s} style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        letterSpacing: 1, padding: "5px 12px",
+                        border: `1px solid ${t.border}`, borderRadius: 6,
+                        color: t.muted, background: t.bg,
+                      }}>
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </a>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ background: INK, padding: `80px ${px}` }}>
+      <section id="about" style={{ background: t.sectionAlt, padding: `100px ${px}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 10,
-              letterSpacing: 3.5,
-              color: PAPER + "30",
-              textTransform: "uppercase",
-              marginBottom: 18,
-            }}
-          >
-            About Me
-          </div>
+          <Reveal>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: 3, color: t.accent, textTransform: "uppercase", marginBottom: 12,
+            }}>
+              About Me
+            </div>
+          </Reveal>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: lg ? "1fr 1fr" : "1fr",
-              gap: lg ? 80 : 48,
-              alignItems: "start",
-            }}
-          >
+          <div style={{
+            display: "grid", gridTemplateColumns: lg ? "1fr 1fr" : "1fr",
+            gap: lg ? 80 : 48, alignItems: "start",
+          }}>
             <div>
-              <h2
-                style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: sm ? 32 : 44,
-                  letterSpacing: "-1.5px",
-                  lineHeight: 1.12,
-                  color: PAPER,
-                  marginBottom: 28,
-                }}
-              >
-                Developer, creator,
-                <br />
-                <em style={{ opacity: 0.5 }}>and lifelong builder.</em>
-              </h2>
-              <p
-                style={{
-                  fontSize: sm ? 15 : 16,
-                  lineHeight: 1.85,
-                  color: PAPER + "68",
-                  marginBottom: 18,
-                }}
-              >
-                I'm{" "}
-                <strong style={{ color: PAPER, fontWeight: 600 }}>
-                  Great Anthony
-                </strong>{" "}
-                — a frontend developer building products at{" "}
-                <strong style={{ color: PAPER, fontWeight: 600 }}>
-                  Pantheon
-                </strong>
-                , a venture studio in Abuja, while completing my Computer
-                Science degree at Veritas University.
-              </p>
-              <p
-                style={{
-                  fontSize: sm ? 15 : 16,
-                  lineHeight: 1.85,
-                  color: PAPER + "50",
-                }}
-              >
-                Outside of code I run a cinematic history YouTube channel, trade
-                forex and index markets, and build side projects I wish existed.
-                I take craft seriously — every pixel, every interaction matters.
-              </p>
+              <Reveal delay={0.05}>
+                <h2 style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 32 : 44,
+                  letterSpacing: "-1.5px", lineHeight: 1.1, fontWeight: 700,
+                  color: t.fg, marginBottom: 28,
+                }}>
+                  Developer, creator,<br />
+                  <span style={{ color: t.muted }}>and lifelong builder.</span>
+                </h2>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <p style={{ fontSize: sm ? 15 : 16, lineHeight: 1.85, color: t.muted, marginBottom: 18 }}>
+                  I'm <strong style={{ color: t.fg, fontWeight: 600 }}>Great Anthony</strong> — a frontend developer
+                  building products at <strong style={{ color: t.fg, fontWeight: 600 }}>Pantheon</strong>, a venture
+                  studio in Abuja, while completing my Computer Science degree at Veritas University.
+                </p>
+              </Reveal>
+              <Reveal delay={0.15}>
+                <p style={{ fontSize: sm ? 15 : 16, lineHeight: 1.85, color: t.muted }}>
+                  Outside of code I run a cinematic history YouTube channel, trade forex and
+                  index markets, and build side projects I wish existed. Every pixel, every interaction matters.
+                </p>
+              </Reveal>
             </div>
 
             <div>
-              <div style={{ border: `1px solid ${PAPER}10` }}>
-                {[
-                  ["Location", "Abuja, Nigeria"],
-                  ["Status", "Open to Work"],
-                  ["Stack", "React / Next.js / TypeScript"],
-                  ["Education", "CS — Veritas University"],
-                  ["Currently", "Pantheon Studio"],
-                  ["Remote", "Available Worldwide"],
-                ].map(([k, v], i, arr) => (
-                  <div
-                    key={k}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "16px 20px",
-                      borderBottom:
-                        i < arr.length - 1 ? `1px solid ${PAPER}08` : "none",
-                      flexWrap: "wrap",
-                      gap: 8,
+              <Reveal delay={0.1}>
+                <div style={{ border: `1.5px solid ${t.border}`, borderRadius: 12, overflow: "hidden" }}>
+                  {[
+                    ["Location", "Abuja, Nigeria"],
+                    ["Status", "Open to Work"],
+                    ["Stack", "React / Next.js / TypeScript"],
+                    ["Education", "CS — Veritas University"],
+                    ["Currently", "Pantheon Studio"],
+                    ["Remote", "Available Worldwide"],
+                  ].map(([k, v], i, arr) => (
+                    <div key={k} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "16px 22px", borderBottom: i < arr.length - 1 ? `1px solid ${t.border}` : "none",
+                      flexWrap: "wrap", gap: 8, transition: "background .2s",
                     }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "'DM Mono', monospace",
-                        fontSize: 10,
-                        letterSpacing: 2.5,
-                        color: PAPER + "30",
-                      }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = t.cardBg}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                     >
-                      {k}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 500,
-                        color: PAPER + "80",
-                      }}
-                    >
-                      {v}
-                    </span>
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        letterSpacing: 2, color: t.muted,
+                      }}>
+                        {k}
+                      </span>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: t.fg }}>
+                        {v}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+              <Reveal delay={0.15}>
+                <div style={{ marginTop: 16 }}>
+                  <a href="#contact" className="btn-primary" style={{ width: "100%", justifyContent: "center", borderRadius: 8 }}>
+                    Work With Me →
+                  </a>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+
+          {/* Experience Timeline */}
+          <div style={{ marginTop: 80 }}>
+            <Reveal>
+              <h3 style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 24 : 30,
+                letterSpacing: "-1px", fontWeight: 700, color: t.fg, marginBottom: 40,
+              }}>
+                Experience
+              </h3>
+            </Reveal>
+
+            <div style={{ position: "relative", paddingLeft: sm ? 24 : 40 }}>
+              <div style={{
+                position: "absolute", left: sm ? 5 : 5, top: 6, bottom: 6,
+                width: 2, background: `linear-gradient(to bottom, ${t.accent}, ${t.accent}20)`,
+              }} />
+
+              {EXPERIENCE.map((exp, i) => (
+                <Reveal key={i} delay={i * 0.1}>
+                  <div style={{ position: "relative", marginBottom: i < EXPERIENCE.length - 1 ? 36 : 0, paddingLeft: sm ? 16 : 24 }}>
+                    <div className="timeline-dot" style={{ position: "absolute", left: sm ? -24 : -40, top: 6 }} />
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+                      letterSpacing: 2, color: t.accent, marginBottom: 6,
+                    }}>
+                      {exp.year}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Space Grotesk', sans-serif", fontSize: 18,
+                      fontWeight: 600, color: t.fg, marginBottom: 4,
+                    }}>
+                      {exp.role}
+                    </div>
+                    <div style={{ fontSize: 14, color: t.muted, marginBottom: 4 }}>
+                      {exp.company}
+                    </div>
+                    <div style={{ fontSize: 13, color: t.muted + "90" }}>
+                      {exp.desc}
+                    </div>
                   </div>
-                ))}
-              </div>
-              <div style={{ marginTop: 20 }}>
-                <a
-                  href="#contact"
-                  className="btn-light"
-                  style={{ width: "100%", borderRadius: 0 }}
-                >
-                  Work With Me →
-                </a>
-              </div>
+                </Reveal>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* ── SKILLS ── */}
-      <section
-        style={{ padding: `80px ${px}`, maxWidth: 1200, margin: "0 auto" }}
-      >
-        <div
-          style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: 10,
-            letterSpacing: 3.5,
-            color: INK + "35",
-            textTransform: "uppercase",
-            marginBottom: 18,
-          }}
-        >
-          Tech Stack
-        </div>
-        <h2
-          style={{
-            fontFamily: "'Libre Baskerville', serif",
-            fontSize: sm ? 32 : 44,
-            letterSpacing: "-1.5px",
-            color: INK,
-            marginBottom: 36,
-            lineHeight: 1.1,
-          }}
-        >
-          My Toolkit
-        </h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <section id="skills" style={{ padding: `100px ${px}`, maxWidth: 1200, margin: "0 auto" }}>
+        <Reveal>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+            letterSpacing: 3, color: t.accent, textTransform: "uppercase", marginBottom: 12,
+          }}>
+            Tech Stack
+          </div>
+        </Reveal>
+        <Reveal delay={0.05}>
+          <h2 style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 32 : 44,
+            letterSpacing: "-1.5px", fontWeight: 700, color: t.fg, marginBottom: 48, lineHeight: 1.1,
+          }}>
+            My Toolkit
+          </h2>
+        </Reveal>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: lg ? "repeat(2, 1fr)" : "1fr",
+          gap: 20,
+        }}>
           {SKILLS.map((s) => (
-            <span key={s} className="skill-tag">
-              {s}
-            </span>
+            <SkillBar key={s.name} name={s.name} level={s.level} t={t} />
           ))}
         </div>
       </section>
 
       {/* ── SERVICES ── */}
-      <section
-        id="services"
-        style={{
-          padding: `80px ${px}`,
-          borderTop: `1px solid ${INK}08`,
-          maxWidth: 1200,
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: 10,
-            letterSpacing: 3.5,
-            color: INK + "35",
-            textTransform: "uppercase",
-            marginBottom: 18,
-          }}
-        >
-          What I Do
-        </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: 40,
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: sm ? 32 : 44,
-              letterSpacing: "-1.5px",
-              lineHeight: 1.1,
-              color: INK,
-            }}
-          >
-            Services
-          </h2>
-          <p
-            style={{
-              fontSize: 14,
-              color: INK + "55",
-              maxWidth: 300,
-              lineHeight: 1.65,
-            }}
-          >
-            I work with startups, agencies, and businesses of all sizes.
-          </p>
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: lg ? "repeat(2,1fr)" : "1fr",
-            gap: 1,
-            background: INK + "08",
-          }}
-        >
-          {SERVICES.map((s) => (
-            <div key={s.num} className="svc-card">
-              <div
-                className="sn"
-                style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 10,
-                  letterSpacing: 3,
-                  color: INK + "22",
-                  marginBottom: 16,
-                  transition: "color .18s",
-                }}
-              >
-                {s.num}
-              </div>
-              <h3
-                className="st"
-                style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontSize: 23,
-                  letterSpacing: "-.5px",
-                  color: INK,
-                  marginBottom: 12,
-                  lineHeight: 1.25,
-                  transition: "color .18s",
-                }}
-              >
-                {s.title}
-              </h3>
-              <p
-                className="sd"
-                style={{
-                  fontSize: 14,
-                  lineHeight: 1.78,
-                  color: INK + "58",
-                  transition: "color .18s",
-                }}
-              >
-                {s.desc}
+      <section id="services" style={{ background: t.sectionAlt, padding: `100px ${px}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: 3, color: t.accent, textTransform: "uppercase", marginBottom: 12,
+            }}>
+              What I Do
+            </div>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "flex-end",
+              marginBottom: 48, flexWrap: "wrap", gap: 16,
+            }}>
+              <h2 style={{
+                fontFamily: "'Space Grotesk', sans-serif", fontSize: sm ? 32 : 44,
+                letterSpacing: "-1.5px", lineHeight: 1.1, fontWeight: 700, color: t.fg,
+              }}>
+                Services
+              </h2>
+              <p style={{ fontSize: 14, color: t.muted, maxWidth: 320, lineHeight: 1.65 }}>
+                I work with startups, agencies, and businesses of all sizes.
               </p>
             </div>
-          ))}
+          </Reveal>
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: lg ? "repeat(2,1fr)" : "1fr",
+            gap: 16,
+          }}>
+            {SERVICES.map((s, i) => (
+              <Reveal key={s.num} delay={i * 0.08}>
+                <div className="svc-card">
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+                    <span style={{ fontSize: 28 }}>{s.icon}</span>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                      letterSpacing: 2, color: t.muted,
+                    }}>
+                      {s.num}
+                    </span>
+                  </div>
+                  <h3 style={{
+                    fontFamily: "'Space Grotesk', sans-serif", fontSize: 22,
+                    letterSpacing: "-0.3px", fontWeight: 700, color: t.fg,
+                    marginBottom: 12, lineHeight: 1.25,
+                  }}>
+                    {s.title}
+                  </h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.75, color: t.muted }}>
+                    {s.desc}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── CONTACT ── */}
-      <section
-        id="contact"
-        style={{ background: INK, padding: `80px ${px} 100px` }}
-      >
+      <section id="contact" style={{ padding: `100px ${px} 80px` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 10,
-              letterSpacing: 3.5,
-              color: PAPER + "28",
-              textTransform: "uppercase",
-              marginBottom: 18,
-            }}
-          >
-            Contact
-          </div>
+          <Reveal>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: 3, color: t.accent, textTransform: "uppercase", marginBottom: 12,
+            }}>
+              Contact
+            </div>
+          </Reveal>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: lg ? "1fr 1fr" : "1fr",
-              gap: lg ? 80 : 48,
-              alignItems: "start",
-            }}
-          >
+          <div style={{
+            display: "grid", gridTemplateColumns: lg ? "1fr 1fr" : "1fr",
+            gap: lg ? 80 : 48, alignItems: "start",
+          }}>
             <div>
-              <h2
-                style={{
-                  fontFamily: "'Libre Baskerville', serif",
-                  fontStyle: "italic",
-                  fontSize: sm
-                    ? "clamp(34px,10vw,48px)"
-                    : "clamp(44px,5.5vw,66px)",
-                  letterSpacing: "-2px",
-                  color: PAPER,
-                  lineHeight: 1.08,
-                  marginBottom: 22,
-                }}
-              >
-                Let's build something great together.
-              </h2>
-              <p
-                style={{
-                  fontSize: sm ? 15 : 16,
-                  lineHeight: 1.8,
-                  color: PAPER + "52",
-                  maxWidth: 380,
-                }}
-              >
-                Open to freelance projects, contracts, and full-time remote
-                roles. International clients welcome — I invoice in USD.
-              </p>
+              <Reveal delay={0.05}>
+                <h2 style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: sm ? "clamp(32px,10vw,44px)" : "clamp(44px,5vw,60px)",
+                  letterSpacing: "-2px", fontWeight: 700, color: t.fg,
+                  lineHeight: 1.05, marginBottom: 22,
+                }}>
+                  Let's build something{" "}
+                  <span style={{ color: t.accent }}>great</span> together.
+                </h2>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <p style={{ fontSize: sm ? 15 : 16, lineHeight: 1.8, color: t.muted, maxWidth: 400 }}>
+                  Open to freelance projects, contracts, and full-time remote roles.
+                  International clients welcome — I invoice in USD.
+                </p>
+              </Reveal>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div
-                style={{
-                  padding: "20px 22px",
-                  border: `1.5px solid ${PAPER}12`,
+            <Reveal delay={0.1}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{
+                  padding: "22px 24px", border: `1.5px solid ${t.border}`, borderRadius: 10,
+                  background: t.cardBg, transition: "border-color .2s",
                 }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: 3,
-                    color: PAPER + "28",
-                    marginBottom: 8,
-                    textTransform: "uppercase",
-                  }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = t.accent}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = t.border}
                 >
-                  Email
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                    letterSpacing: 2, color: t.muted, marginBottom: 8,
+                  }}>
+                    EMAIL
+                  </div>
+                  <a href="mailto:agreat496@email.com" style={{
+                    fontSize: 15, color: t.fg, fontWeight: 500,
+                  }}>
+                    agreat496@email.com
+                  </a>
                 </div>
-                <a
-                  href="mailto:agreat496@email.com"
-                  style={{
-                    fontSize: 15,
-                    color: PAPER + "75",
-                    fontWeight: 500,
-                    borderBottom: `1px solid ${PAPER}20`,
-                    paddingBottom: 2,
-                  }}
-                >
-                  agreat496@email.com"
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  {[
+                    ["GitHub", "https://github.com/tegatheprogrammer", "tegatheprogrammer"],
+                    ["Twitter/X", "https://x.com/tegatheprogrammer", "@tegatheprogrammer"],
+                  ].map(([label, href, val]) => (
+                    <a key={label} href={href} target="_blank" rel="noreferrer" style={{
+                      padding: "18px 18px", border: `1.5px solid ${t.border}`, borderRadius: 10,
+                      display: "block", transition: "border-color .2s", background: t.cardBg,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = t.accent}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = t.border}
+                    >
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        letterSpacing: 2, color: t.muted, marginBottom: 8,
+                      }}>
+                        {label.toUpperCase()}
+                      </div>
+                      <div style={{ fontSize: 13, color: t.fg, fontWeight: 500, wordBreak: "break-all" }}>
+                        {val}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+
+                <a href="mailto:agreat496@email.com" className="btn-primary" style={{ textAlign: "center", justifyContent: "center", borderRadius: 8 }}>
+                  Send Me an Email →
                 </a>
               </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                }}
-              >
-                {[
-                  [
-                    "GitHub",
-                    "https://github.com/tegatheprogrammer",
-                    "tegatheprogrammer",
-                  ],
-                  [
-                    "Portfolio",
-                    "https://anth-ten.vercel.app",
-                    "anth-ten.vercel.app",
-                  ],
-                ].map(([label, href, val]) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: "18px 18px",
-                      border: `1.5px solid ${PAPER}10`,
-                      display: "block",
-                      transition: "border-color .18s",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontFamily: "'DM Mono', monospace",
-                        fontSize: 9,
-                        letterSpacing: 3,
-                        color: PAPER + "28",
-                        marginBottom: 8,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: PAPER + "60",
-                        fontWeight: 500,
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {val}
-                    </div>
-                  </a>
-                ))}
-              </div>
-
-              <a href="mailto:agreat496@email.com" className="btn-light">
-                Send Me an Email →
-              </a>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer
-        style={{
-          background: INK,
-          borderTop: `1px solid ${PAPER}07`,
-          padding: `20px ${px}`,
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 16,
-              color: PAPER + "35",
-            }}
-          >
-            Great Anthony
+      <footer style={{ borderTop: `1px solid ${t.border}`, padding: `24px ${px}` }}>
+        <div style={{
+          maxWidth: 1200, margin: "0 auto", display: "flex",
+          justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16,
+        }}>
+          <span style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 700, color: t.fg,
+          }}>
+            GA<span style={{ color: t.accent }}>.</span>
           </span>
-          <span
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 9,
-              letterSpacing: 3,
-              color: PAPER + "20",
-            }}
-          >
-            © 2026 — ABUJA, NIGERIA
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+            letterSpacing: 2, color: t.muted,
+          }}>
+            © 2025 — ABUJA, NIGERIA
           </span>
-          <span
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 9,
-              letterSpacing: 2,
-              color: PAPER + "20",
-            }}
-          >
-            FRONTEND DEVELOPER
-          </span>
+          <div style={{ display: "flex", gap: 20 }}>
+            {[
+              ["GitHub", "https://github.com/tegatheprogrammer"],
+              ["Twitter/X", "https://x.com/tegatheprogrammer"],
+              ["LinkedIn", "https://linkedin.com/in/tegatheprogrammer"],
+            ].map(([label, href]) => (
+              <a key={label} href={href} target="_blank" rel="noreferrer" style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                letterSpacing: 1, color: t.muted, transition: "color .2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = t.accent}
+              onMouseLeave={(e) => e.currentTarget.style.color = t.muted}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
         </div>
       </footer>
+
+      {/* Back to top */}
+      {showTop && (
+        <button className="back-to-top" onClick={scrollToTop} style={{ opacity: showTop ? 1 : 0 }}>
+          ↑
+        </button>
+      )}
     </div>
   );
 }
